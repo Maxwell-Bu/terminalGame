@@ -1,24 +1,52 @@
 #include <string>
 #include <iostream>
+#include <thread>
+#include <chrono>
+#include <windows.h>
 
-void draw_screen(int& height, int& width) {
-    	for (int i{0}; i < width; ++i) {
-		for (int j{0}; j < height; ++j) {
-			std::cout << ". ";
+//Game state variables
+const int screen_width{80};
+const int screen_height{25};
+const int FPS{30};
+const std::chrono::milliseconds frame_duration(1000 / FPS); //33 ms
+
+void draw_screen(int width, int height) {
+    std::string frame_buffer = "";
+    
+    frame_buffer += "\033[H";
+
+    	for (int y{0}; y < height; ++y) {
+		    for (int x{0}; x < height; ++x) {
+			    frame_buffer += '.';
+
+            frame_buffer += '\n';
 		}
 	
 		std::cout << "\n";
 	}
+
+    std::cout << frame_buffer << std::flush;
 }
 
 int main() {
+	
+	std::cout << "\033[?25l";
 
-	int screen_height{10};
-	int screen_width{8};
+    while (true) {
+	    auto frame_start = std::chrono::steady_clock::now();
+		
+	    //input logic will go here
 
-    	while (true) {
-        	draw_screen(screen_height, screen_width);
-    	}
-    
-    	return 0;
+        draw_screen(screen_width, screen_height);
+
+	    auto frame_end = std::chrono::steady_clock::now();
+	    auto dt = std::chrono::duration_cast<std::chrono::milliseconds>(frame_end - frame_start);
+
+	    if (dt < frame_duration) {
+		    std::this_thread::sleep_for(frame_duration - dt);
+	    }
+	}
+	
+	std::cout << "\033[?25h";
+    return 0;
 }
