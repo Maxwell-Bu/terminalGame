@@ -3,11 +3,12 @@
 #include <thread>
 #include <chrono>
 #include <windows.h>
+#include <vector>
 
 //Game state variables
 const int screen_width{80};
-const int screen_height{40};
-const int FPS{30};
+const int screen_height{30};
+const int FPS{12};
 const std::chrono::milliseconds frame_duration(1000 / FPS); //33 ms
 
 void enableAnsiSupport() {
@@ -22,13 +23,18 @@ void enableAnsiSupport() {
 }
 
 void draw_screen(int width, int height) {
-    std::string frame_buffer = "";
+	std::string frame_buffer = "";
     
-    frame_buffer += "\033[H";
+	frame_buffer += "\033[H";
+	frame_buffer += "\n";
 
-    	for (int y{0}; y < height-1; ++y) {
+    	for (int y{0}; y < height; ++y) {
 		for (int x{0}; x < width; ++x) {
-			frame_buffer += 'O';
+			if (y == 0 or y == height-1 or x == 0 or x == width-1) {
+				frame_buffer += '#';
+			} else {
+				frame_buffer += 'O';
+			}
 		}
 	std::cout << "\n";
 	}
@@ -39,6 +45,7 @@ void draw_screen(int width, int height) {
 int main() {
 	
 	enableAnsiSupport();
+	std::cout << "\x1b[8;30;80t";
 	std::cout << "\033[?25l";
 
     while (true) {
